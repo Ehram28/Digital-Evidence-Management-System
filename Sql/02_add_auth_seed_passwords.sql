@@ -9,7 +9,7 @@
 MERGE dbo.Roles AS target
 USING (VALUES
     ('Administrator', 'Can manage users, cases, evidence, and system settings.'),
-    ('Examiner', 'Can create cases, upload evidence, and add chain-of-custody entries.'),
+    ('Examiner', 'Investigator role: can create cases, upload evidence, and add chain-of-custody entries.'),
     ('Reviewer', 'Can review case and evidence records.'),
     ('ReadOnly', 'Can view permitted case records without modifying evidence.')
 ) AS source (RoleName, Description)

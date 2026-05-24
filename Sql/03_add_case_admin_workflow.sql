@@ -44,3 +44,8 @@ GO
 ALTER TABLE dbo.AccessAuditLogs
 ADD CONSTRAINT CK_Audit_EventType CHECK (EventType IN ('login', 'logout', 'case_view', 'case_create', 'case_update', 'case_complete', 'case_cancel', 'case_delete', 'upload', 'download', 'hash_verify', 'metadata_change', 'access_denied'));
 GO
+
+UPDATE dbo.Roles
+SET Description = 'Investigator role: can create cases, upload evidence, and add chain-of-custody entries.'
+WHERE RoleName = 'Examiner';
+GO
