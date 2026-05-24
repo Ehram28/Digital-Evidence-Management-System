@@ -13,13 +13,14 @@ public static class AppRoles
     public const string AnyLabUser = Administrator + "," + Examiner + "," + Reviewer + "," + ReadOnly;
     public const string CaseWriters = Administrator + "," + Examiner;
     public const string EvidenceWriters = Administrator + "," + Examiner;
-    public const string EvidenceReviewers = Administrator + "," + Examiner + "," + Reviewer;
+    public const string EvidenceVerifiers = Administrator + "," + Examiner + "," + Reviewer;
+    public const string EvidenceDownloaders = Administrator + "," + Examiner;
 
     public static readonly IReadOnlyList<AppRoleOption> ForensicTeamRoles =
     [
         new(Administrator, "Administrator - complete access", "Can manage users, cases, evidence, and system settings."),
         new(Investigator, "Investigator - create and upload", "Can create cases, upload evidence, and add chain-of-custody entries."),
-        new(Reviewer, "Reviewer - review and verify", "Can review case and evidence records."),
+        new(Reviewer, "Reviewer - verify only", "Can review records and verify evidence integrity without downloading evidence."),
         new(ReadOnly, "Reader - view only", "Can view permitted case records without modifying evidence.")
     ];
 

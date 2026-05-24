@@ -148,7 +148,7 @@ public sealed class EvidenceController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Roles = AppRoles.EvidenceReviewers)]
+    [Authorize(Roles = AppRoles.EvidenceVerifiers)]
     public async Task<IActionResult> Verify(long id, CancellationToken cancellationToken)
     {
         var evidence = await _evidenceRepository.GetByIdAsync(id, cancellationToken);
@@ -187,7 +187,7 @@ public sealed class EvidenceController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
-    [Authorize(Roles = AppRoles.EvidenceReviewers)]
+    [Authorize(Roles = AppRoles.EvidenceDownloaders)]
     public async Task<IActionResult> Download(long id, CancellationToken cancellationToken)
     {
         var evidence = await _evidenceRepository.GetByIdAsync(id, cancellationToken);
