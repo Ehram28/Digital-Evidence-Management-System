@@ -70,6 +70,16 @@ public sealed class CasesController : Controller
     [Authorize(Roles = AppRoles.CaseWriters)]
     public async Task<IActionResult> Create(CaseCreateViewModel model, CancellationToken cancellationToken)
     {
+        if (!CaseCreateViewModel.Statuses.Contains(model.Status))
+        {
+            ModelState.AddModelError(nameof(model.Status), "Select a valid active status.");
+        }
+
+        if (!CaseCreateViewModel.Priorities.Contains(model.Priority))
+        {
+            ModelState.AddModelError(nameof(model.Priority), "Select a valid priority.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);

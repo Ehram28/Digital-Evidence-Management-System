@@ -64,6 +64,11 @@ public sealed class EvidenceController : Controller
             return NotFound();
         }
 
+        if (caseRecord.IsTerminal)
+        {
+            return Conflict("Evidence cannot be uploaded to a completed or cancelled case.");
+        }
+
         return View(new EvidenceUploadViewModel
         {
             CaseId = caseId,
@@ -81,6 +86,11 @@ public sealed class EvidenceController : Controller
         if (caseRecord is null)
         {
             return NotFound();
+        }
+
+        if (caseRecord.IsTerminal)
+        {
+            ModelState.AddModelError(string.Empty, "Evidence cannot be uploaded to a completed or cancelled case.");
         }
 
         model.CaseNumber = caseRecord.CaseNumber;

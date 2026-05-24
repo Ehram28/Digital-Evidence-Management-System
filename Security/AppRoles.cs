@@ -28,4 +28,14 @@ public static class AppRoles
         role = ForensicTeamRoles.FirstOrDefault(option => option.Name == roleName);
         return role is not null;
     }
+
+    public static string ToDisplayName(string roleName)
+    {
+        return roleName switch
+        {
+            Examiner => "Investigator",
+            ReadOnly => "Reader",
+            _ => roleName
+        };
+    }
 }
