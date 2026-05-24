@@ -48,7 +48,7 @@
                             <span>@(User.Identity?.Name ?? "Signed in")</span>
                             @if (activeRoles.Length > 0)
                             {
-                                <small>@string.Join(", ", activeRoles)</small>
+                                <small>@string.Join(", ", activeRoles.Select(AppRoles.ToDisplayName))</small>
                             }
                             <form asp-controller="Account" asp-action="Logout" method="post">
                                 <button class="btn btn-sm btn-outline-light" type="submit">Sign out</button>

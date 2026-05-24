@@ -2,7 +2,9 @@
 
 @{
     ViewData["Title"] = Model.Evidence.OriginalFileName;
-    var canHandleEvidence = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner) || User.IsInRole(AppRoles.Reviewer);
+    var canVerifyEvidence = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner) || User.IsInRole(AppRoles.Reviewer);
+    var canDownloadEvidence = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner);
+    var isReviewerOnly = User.IsInRole(AppRoles.Reviewer) && !canDownloadEvidence;
 }
 
 <section class="page-heading">
@@ -10,16 +12,27 @@
         <p class="eyebrow">Case @Model.Evidence.CaseNumber</p>
         <h1>@Model.Evidence.OriginalFileName</h1>
     </div>
-    @if (canHandleEvidence)
+    @if (canVerifyEvidence || canDownloadEvidence)
     {
         <div class="action-row">
-            <form asp-action="Verify" asp-route-id="@Model.Evidence.EvidenceId" method="post">
-                <button class="btn btn-outline-dark" type="submit">Verify hash</button>
-            </form>
-            <a class="btn btn-primary" asp-action="Download" asp-route-id="@Model.Evidence.EvidenceId">Download</a>
+            @if (canVerifyEvidence)
+            {
+                <form asp-action="Verify" asp-route-id="@Model.Evidence.EvidenceId" method="post">
+                    <button class="btn btn-outline-dark" type="submit">Verify hash</button>
+                </form>
+            }
+            @if (canDownloadEvidence)
+            {
+                <a class="btn btn-primary" asp-action="Download" asp-route-id="@Model.Evidence.EvidenceId">Download</a>
+            }
         </div>
     }
 </section>
+
+@if (isReviewerOnly)
+{
+    <div class="alert alert-info">Reviewer access allows metadata review and hash verification only. Evidence download is reserved for Administrator and Investigator roles.</div>
+}
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
