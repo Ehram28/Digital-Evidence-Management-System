@@ -88,4 +88,122 @@ public sealed class CasesController : Controller
             return View(model);
         }
     }
+
+    [Authorize(Roles = AppRoles.Administrator)]
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
+    {
+        var caseRecord = await _caseRepository.GetByIdAsync(id, cancellationToken);
+        if (caseRecord is null)
+        {
+            return NotFound();
+        }
+
+        return View(new CaseEditViewModel
+        {
+            CaseId = caseRecord.CaseId,
+            CaseNumber = caseRecord.CaseNumber,
+            Title = caseRecord.Title,
+            Description = caseRecord.Description,
+            Priority = caseRecord.Priority
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.Administrator)]
+    public async Task<IActionResult> Edit(CaseEditViewModel model, CancellationToken cancellationToken)
+    {
+        if (!CaseEditViewModel.Priorities.Contains(model.Priority))
+        {
+            ModelState.AddModelError(nameof(model.Priority), "Select a valid priority.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = await _currentUserService.GetCurrentUserAsync(cancellationToken);
+        try
+        {
+            await _caseRepository.UpdateAsync(model, cancellationToken);
+            await _auditLogService.LogAsync(user, "case_update", "case", model.CaseId.ToString(), $"Updated case {model.CaseNumber}.", cancellationToken: cancellationToken);
+            TempData["StatusMessage"] = "Case details were updated.";
+            return RedirectToAction(nameof(Details), new { id = model.CaseId });
+        }
+        catch (SqlException ex) when (ex.Number is 2601 or 2627)
+        {
+            ModelState.AddModelError(nameof(model.CaseNumber), "A case with this ID already exists.");
+            return View(model);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.Administrator)]
+    public Task<IActionResult> Complete(int id, string? reason, CancellationToken cancellationToken)
+    {
+        return ResolveCaseAsync(id, "Completed", "case_complete", reason, cancellationToken);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.Administrator)]
+    public Task<IActionResult> Cancel(int id, string? reason, CancellationToken cancellationToken)
+    {
+        return ResolveCaseAsync(id, "Cancelled", "case_cancel", reason, cancellationToken);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.Administrator)]
+    public async Task<IActionResult> Delete(int id, string? reason, CancellationToken cancellationToken)
+    {
+        var caseRecord = await _caseRepository.GetByIdAsync(id, cancellationToken);
+        if (caseRecord is null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            TempData["StatusMessage"] = "Removal requires a reason.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var user = await _currentUserService.GetCurrentUserAsync(cancellationToken);
+        var deleted = await _caseRepository.DeleteIfEmptyAsync(id, cancellationToken);
+        if (!deleted)
+        {
+            await _auditLogService.LogAsync(user, "case_delete", "case", id.ToString(), $"Removal blocked for {caseRecord.CaseNumber}. Reason entered: {reason.Trim()}.", false, cancellationToken);
+            TempData["StatusMessage"] = "This case has evidence and cannot be removed. Cancel it with a reason instead.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        await _auditLogService.LogAsync(user, "case_delete", "case", id.ToString(), $"Removed case {caseRecord.CaseNumber}. Reason: {reason.Trim()}.", cancellationToken: cancellationToken);
+        TempData["StatusMessage"] = $"Case {caseRecord.CaseNumber} was removed.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    private async Task<IActionResult> ResolveCaseAsync(int id, string status, string eventType, string? reason, CancellationToken cancellationToken)
+    {
+        var caseRecord = await _caseRepository.GetByIdAsync(id, cancellationToken);
+        if (caseRecord is null)
+        {
+            return NotFound();
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            TempData["StatusMessage"] = $"{status} requires a reason.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var user = await _currentUserService.GetCurrentUserAsync(cancellationToken);
+        await _caseRepository.ResolveAsync(id, status, reason, user.UserId, cancellationToken);
+        await _auditLogService.LogAsync(user, eventType, "case", id.ToString(), $"{status} case {caseRecord.CaseNumber}. Reason: {reason.Trim()}.", cancellationToken: cancellationToken);
+
+        TempData["StatusMessage"] = $"Case marked {status.ToLowerInvariant()}.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
 }

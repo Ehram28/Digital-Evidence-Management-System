@@ -10,8 +10,13 @@ public sealed class CaseRecord
     public string Priority { get; set; } = "Normal";
     public int? AssignedExaminerId { get; set; }
     public string? AssignedExaminerName { get; set; }
+    public int? ClosedByUserId { get; set; }
+    public string? ClosedByName { get; set; }
+    public string? ResolutionReason { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
     public DateTime? ClosedAtUtc { get; set; }
     public int EvidenceCount { get; set; }
+
+    public bool IsTerminal => Status is "Completed" or "Cancelled" or "Closed";
 }

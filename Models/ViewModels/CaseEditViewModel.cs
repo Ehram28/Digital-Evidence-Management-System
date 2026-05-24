@@ -2,8 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DigitalEvidenceManagementSystem.Models.ViewModels;
 
-public sealed class CaseCreateViewModel
+public sealed class CaseEditViewModel
 {
+    public int CaseId { get; set; }
+
     [Required, StringLength(50)]
     [Display(Name = "Case ID")]
     public string CaseNumber { get; set; } = string.Empty;
@@ -17,9 +19,5 @@ public sealed class CaseCreateViewModel
     [Required]
     public string Priority { get; set; } = "Normal";
 
-    [Required]
-    public string Status { get; set; } = "Open";
-
-    public static readonly IReadOnlyList<string> Statuses = ["Open", "In Review", "On Hold"];
     public static readonly IReadOnlyList<string> Priorities = ["Low", "Normal", "High", "Critical"];
 }
