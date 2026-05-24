@@ -1,0 +1,48 @@
+@model CaseEditViewModel
+
+@{
+    ViewData["Title"] = $"Edit {Model.CaseNumber}";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Admin case control</p>
+        <h1>Edit Case</h1>
+    </div>
+    <a class="btn btn-outline-dark" asp-action="Details" asp-route-id="@Model.CaseId">Back to case</a>
+</section>
+
+<form class="content-panel form-stack" asp-action="Edit" method="post">
+    <input asp-for="CaseId" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div>
+        <label asp-for="CaseNumber" class="form-label"></label>
+        <input asp-for="CaseNumber" class="form-control" />
+        <span asp-validation-for="CaseNumber" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Priority" class="form-label"></label>
+        <select asp-for="Priority" class="form-select">
+            @foreach (var priority in CaseEditViewModel.Priorities)
+            {
+                <option value="@priority">@priority</option>
+            }
+        </select>
+        <span asp-validation-for="Priority" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <button class="btn btn-primary align-self-start" type="submit">Save changes</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

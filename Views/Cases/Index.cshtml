@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Cases";
     var canCreateCases = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner);
+    var isAdmin = User.IsInRole(AppRoles.Administrator);
 }
 
 <section class="page-heading">
@@ -14,6 +15,16 @@
     {
         <a class="btn btn-primary" asp-action="Create">Create case</a>
     }
+</section>
+
+@if (TempData["StatusMessage"] is string statusMessage)
+{
+    <div class="alert alert-info">@statusMessage</div>
+}
+
+<section class="content-panel role-split">
+    <strong>Access split:</strong>
+    Admin can edit, complete, cancel, and remove empty cases. Investigator can create cases and upload evidence. Reviewer can verify/download evidence. Reader can view records only.
 </section>
 
 <form class="filter-bar" method="get">
@@ -47,6 +58,10 @@
                 <th>Assigned examiner</th>
                 <th>Evidence</th>
                 <th>Updated</th>
+                @if (isAdmin)
+                {
+                    <th>Admin</th>
+                }
             </tr>
             </thead>
             <tbody>
@@ -60,6 +75,10 @@
                     <td>@(item.AssignedExaminerName ?? "Unassigned")</td>
                     <td>@item.EvidenceCount</td>
                     <td>@item.UpdatedAtUtc.ToString("u")</td>
+                    @if (isAdmin)
+                    {
+                        <td><a asp-action="Edit" asp-route-id="@item.CaseId">Edit</a></td>
+                    }
                 </tr>
             }
             </tbody>

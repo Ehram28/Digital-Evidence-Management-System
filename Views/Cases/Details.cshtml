@@ -2,7 +2,8 @@
 
 @{
     ViewData["Title"] = Model.Case.CaseNumber;
-    var canUploadEvidence = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner);
+    var isAdmin = User.IsInRole(AppRoles.Administrator);
+    var canUploadEvidence = (User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner)) && !Model.Case.IsTerminal;
 }
 
 <section class="page-heading">
@@ -10,16 +11,27 @@
         <p class="eyebrow">Case @Model.Case.CaseNumber</p>
         <h1>@Model.Case.Title</h1>
     </div>
-    @if (canUploadEvidence)
-    {
-        <a class="btn btn-primary" asp-controller="Evidence" asp-action="Upload" asp-route-caseId="@Model.Case.CaseId">Upload evidence</a>
-    }
+    <div class="action-row">
+        @if (isAdmin)
+        {
+            <a class="btn btn-outline-dark" asp-action="Edit" asp-route-id="@Model.Case.CaseId">Edit case</a>
+        }
+        @if (canUploadEvidence)
+        {
+            <a class="btn btn-primary" asp-controller="Evidence" asp-action="Upload" asp-route-caseId="@Model.Case.CaseId">Upload evidence</a>
+        }
+    </div>
 </section>
+
+@if (TempData["StatusMessage"] is string statusMessage)
+{
+    <div class="alert alert-info">@statusMessage</div>
+}
 
 <section class="summary-grid">
     <div>
         <span>Status</span>
-        <strong>@Model.Case.Status</strong>
+        <strong class="case-status case-status-@Model.Case.Status.ToLowerInvariant().Replace(" ", "-")">@Model.Case.Status</strong>
     </div>
     <div>
         <span>Priority</span>
@@ -35,11 +47,59 @@
     </div>
 </section>
 
+@if (!string.IsNullOrWhiteSpace(Model.Case.ResolutionReason))
+{
+    <section class="content-panel">
+        <h2>Case Resolution</h2>
+        <dl class="metadata-grid">
+            <dt>Disposition</dt>
+            <dd>@Model.Case.Status</dd>
+            <dt>Reason</dt>
+            <dd>@Model.Case.ResolutionReason</dd>
+            <dt>Recorded by</dt>
+            <dd>
+                @(Model.Case.ClosedByName ?? "Unknown")
+                @if (Model.Case.ClosedAtUtc is DateTime closedAt)
+                {
+                    <text> on @closedAt.ToString("u")</text>
+                }
+            </dd>
+        </dl>
+    </section>
+}
+
 @if (!string.IsNullOrWhiteSpace(Model.Case.Description))
 {
     <section class="content-panel">
         <h2>Case Notes</h2>
         <p>@Model.Case.Description</p>
+    </section>
+}
+
+@if (isAdmin)
+{
+    <section class="content-panel admin-workflow">
+        <div class="section-header">
+            <h2>Admin Workflow</h2>
+            <span class="access-badge">Administrator only</span>
+        </div>
+        <div class="admin-action-grid">
+            <form class="form-stack" asp-action="Complete" asp-route-id="@Model.Case.CaseId" method="post">
+                <h3>Complete case</h3>
+                <textarea class="form-control" name="reason" rows="3" maxlength="2000" required placeholder="Completion explanation"></textarea>
+                <button class="btn btn-primary" type="submit">Mark completed</button>
+            </form>
+            <form class="form-stack" asp-action="Cancel" asp-route-id="@Model.Case.CaseId" method="post">
+                <h3>Cancel case</h3>
+                <textarea class="form-control" name="reason" rows="3" maxlength="2000" required placeholder="Cancellation reason"></textarea>
+                <button class="btn btn-outline-dark" type="submit">Cancel case</button>
+            </form>
+            <form class="form-stack danger-zone" asp-action="Delete" asp-route-id="@Model.Case.CaseId" method="post" onsubmit="return confirm('Remove this case? Cases with evidence are blocked and should be cancelled instead.');">
+                <h3>Remove case</h3>
+                <textarea class="form-control" name="reason" rows="3" maxlength="2000" required placeholder="Removal reason"></textarea>
+                <button class="btn btn-danger" type="submit">Remove case</button>
+            </form>
+        </div>
     </section>
 }
 
@@ -64,6 +124,12 @@
             </tr>
             </thead>
             <tbody>
+            @if (Model.EvidenceItems.Count == 0)
+            {
+                <tr>
+                    <td colspan="6">No evidence has been added to this case.</td>
+                </tr>
+            }
             @foreach (var item in Model.EvidenceItems)
             {
                 <tr>

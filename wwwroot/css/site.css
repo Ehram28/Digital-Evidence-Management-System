@@ -362,6 +362,51 @@ a:hover {
   margin: 0;
 }
 
+.access-badge {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  color: #3730a3;
+  font-size: .82rem;
+  font-weight: 800;
+  padding: .35rem .6rem;
+}
+
+.role-split {
+  color: #304156;
+  font-size: .95rem;
+}
+
+.admin-action-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-action-grid h3 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.danger-zone {
+  border-left: 4px solid var(--rose);
+  padding-left: 1rem;
+}
+
+.case-status {
+  display: inline-block;
+}
+
+.case-status-completed {
+  color: var(--green);
+}
+
+.case-status-cancelled,
+.case-status-closed {
+  color: var(--rose);
+}
+
 .filter-bar {
   background: rgba(255, 255, 255, .76);
   border: 1px solid var(--border);
@@ -594,6 +639,10 @@ a:hover {
 
   .filter-bar {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-action-grid {
+    grid-template-columns: 1fr;
   }
 }
 
