@@ -70,10 +70,12 @@ Users can also create an account from the sign-up page and choose their forensic
 
 Role access:
 
-- Administrator: full case and evidence access.
-- Examiner: create cases, upload evidence, verify hashes, and download evidence.
-- Reviewer: view cases/evidence, verify hashes, and download evidence.
-- ReadOnly: view dashboards, cases, and evidence metadata only.
+- Administrator: full access, including case edit, completion, cancellation with reason, and removal of empty cases.
+- Investigator: create cases, upload evidence, verify hashes, and download evidence.
+- Reviewer: view cases/evidence and verify hashes only; evidence download and case modification are not allowed.
+- Reader: view dashboards, cases, and evidence metadata only.
+
+Existing database upgrades can be applied with `Sql/03_add_case_admin_workflow.sql`. It adds case resolution reasons, terminal statuses (`Completed`, `Cancelled`), and audit event types for admin case actions.
 
 ## Evidence Upload and SHA-256
 
