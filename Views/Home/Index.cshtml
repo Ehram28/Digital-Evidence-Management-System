@@ -1,0 +1,73 @@
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var canCreateCases = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner);
+}
+
+<section class="page-heading dashboard-hero">
+    <div>
+        <p class="eyebrow">Digital Forensics Lab</p>
+        <h1>Evidence Management Dashboard</h1>
+        <div class="hero-status">
+            <span>SHA-256 Gate</span>
+            <span>CoC Ledger</span>
+            <span>Audit Trail</span>
+        </div>
+    </div>
+    @if (canCreateCases)
+    {
+        <a class="btn btn-primary" asp-controller="Cases" asp-action="Create">Create case</a>
+    }
+</section>
+
+<div class="metric-grid">
+    <div class="metric metric-open">
+        <span>Open cases</span>
+        <strong>@Model.OpenCases</strong>
+    </div>
+    <div class="metric metric-priority">
+        <span>High priority</span>
+        <strong>@Model.HighPriorityCases</strong>
+    </div>
+    <div class="metric metric-evidence">
+        <span>Evidence items</span>
+        <strong>@Model.EvidenceItems</strong>
+    </div>
+    <div class="metric metric-warning warning">
+        <span>Hash mismatches</span>
+        <strong>@Model.HashMismatches</strong>
+    </div>
+</div>
+
+<section class="content-panel">
+    <div class="section-header">
+        <h2>Recent Cases</h2>
+        <a asp-controller="Cases" asp-action="Index">View all</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th>Case ID</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Evidence</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.RecentCases)
+            {
+                <tr>
+                    <td><a asp-controller="Cases" asp-action="Details" asp-route-id="@item.CaseId">@item.CaseNumber</a></td>
+                    <td>@item.Title</td>
+                    <td><span class="badge text-bg-light">@item.Status</span></td>
+                    <td><span class="badge priority-@item.Priority.ToLowerInvariant()">@item.Priority</span></td>
+                    <td>@item.EvidenceCount</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>

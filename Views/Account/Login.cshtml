@@ -1,0 +1,45 @@
+@model LoginViewModel
+
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<section class="auth-shell">
+    <div class="auth-panel">
+        <div class="auth-heading">
+            <span class="brand-mark">DE</span>
+            <div>
+                <p class="eyebrow">Secure access</p>
+                <h1>Sign in</h1>
+            </div>
+        </div>
+
+        <form class="form-stack" asp-action="Login" method="post">
+            <input asp-for="ReturnUrl" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div>
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" autocomplete="username" autofocus />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div>
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-check">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+            <button class="btn btn-primary" type="submit">Sign in</button>
+            <p class="auth-switch">
+                Need an account?
+                <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create one</a>
+            </p>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,55 @@
+@model CaseCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Case";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">New investigation</p>
+        <h1>Create Case</h1>
+    </div>
+</section>
+
+<form class="content-panel form-stack" asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div>
+        <label asp-for="CaseNumber" class="form-label"></label>
+        <input asp-for="CaseNumber" class="form-control" placeholder="DF-2026-0002" />
+        <span asp-validation-for="CaseNumber" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="form-row">
+        <div>
+            <label asp-for="Status" class="form-label"></label>
+            <select asp-for="Status" class="form-select">
+                @foreach (var status in CaseCreateViewModel.Statuses)
+                {
+                    <option value="@status">@status</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label asp-for="Priority" class="form-label"></label>
+            <select asp-for="Priority" class="form-select">
+                @foreach (var priority in CaseCreateViewModel.Priorities)
+                {
+                    <option value="@priority">@priority</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div>
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+    </div>
+    <button class="btn btn-primary align-self-start" type="submit">Create case</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

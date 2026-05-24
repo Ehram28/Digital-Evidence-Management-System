@@ -1,0 +1,81 @@
+@model EvidenceDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Evidence.OriginalFileName;
+    var canHandleEvidence = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner) || User.IsInRole(AppRoles.Reviewer);
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Case @Model.Evidence.CaseNumber</p>
+        <h1>@Model.Evidence.OriginalFileName</h1>
+    </div>
+    @if (canHandleEvidence)
+    {
+        <div class="action-row">
+            <form asp-action="Verify" asp-route-id="@Model.Evidence.EvidenceId" method="post">
+                <button class="btn btn-outline-dark" type="submit">Verify hash</button>
+            </form>
+            <a class="btn btn-primary" asp-action="Download" asp-route-id="@Model.Evidence.EvidenceId">Download</a>
+        </div>
+    }
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+<section class="summary-grid">
+    <div>
+        <span>Evidence type</span>
+        <strong>@Model.Evidence.EvidenceType</strong>
+    </div>
+    <div>
+        <span>Size</span>
+        <strong>@Model.Evidence.FileSizeBytes.ToString("N0") bytes</strong>
+    </div>
+    <div>
+        <span>Original media</span>
+        <strong>@(Model.Evidence.IsOriginalMedia ? "Yes" : "No")</strong>
+    </div>
+    <div>
+        <span>Verification</span>
+        <strong>@Model.Evidence.VerificationStatus</strong>
+    </div>
+</section>
+
+<section class="content-panel">
+    <h2>Integrity Metadata</h2>
+    <dl class="metadata-grid">
+        <dt>SHA-256</dt>
+        <dd><code class="hash">@Model.Evidence.Sha256Hash</code></dd>
+        <dt>Stored path</dt>
+        <dd><code>@Model.Evidence.StoragePath</code></dd>
+        <dt>Uploaded by</dt>
+        <dd>@Model.Evidence.UploadedByName on @Model.Evidence.UploadedAtUtc.ToString("u")</dd>
+        <dt>Last verified</dt>
+        <dd>@(Model.Evidence.LastVerifiedAtUtc?.ToString("u") ?? "Not re-checked yet")</dd>
+    </dl>
+</section>
+
+<section class="content-panel">
+    <h2>Chain of Custody</h2>
+    <ol class="timeline">
+        @foreach (var entry in Model.CustodyEntries)
+        {
+            <li>
+                <div>
+                    <strong>@entry.ActionType.Replace("_", " ")</strong>
+                    <span>@entry.PerformedAtUtc.ToString("u") by @entry.PerformedByName</span>
+                </div>
+                <p>@entry.NarrativeNote</p>
+                <small>@entry.Location @(!string.IsNullOrWhiteSpace(entry.SourceIpAddress) ? $"| IP {entry.SourceIpAddress}" : "")</small>
+                @if (!string.IsNullOrWhiteSpace(entry.FileHashAtAction))
+                {
+                    <code class="hash">@entry.FileHashAtAction</code>
+                }
+            </li>
+        }
+    </ol>
+</section>

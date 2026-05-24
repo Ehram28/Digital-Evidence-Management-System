@@ -1,0 +1,56 @@
+@model EvidenceUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload Evidence";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Case @Model.CaseNumber</p>
+        <h1>Upload Evidence</h1>
+    </div>
+</section>
+
+<form class="content-panel form-stack" asp-action="Upload" method="post" enctype="multipart/form-data">
+    <input asp-for="CaseId" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div>
+        <label asp-for="File" class="form-label"></label>
+        <input asp-for="File" class="form-control" type="file" />
+        <span asp-validation-for="File" class="text-danger"></span>
+    </div>
+    <div class="form-row">
+        <div>
+            <label asp-for="EvidenceType" class="form-label"></label>
+            <select asp-for="EvidenceType" class="form-select">
+                @foreach (var evidenceType in EvidenceUploadViewModel.EvidenceTypes)
+                {
+                    <option value="@evidenceType">@evidenceType</option>
+                }
+            </select>
+        </div>
+        <div class="form-check mt-4">
+            <input asp-for="IsOriginalMedia" class="form-check-input" />
+            <label asp-for="IsOriginalMedia" class="form-check-label"></label>
+        </div>
+    </div>
+    <div>
+        <label asp-for="Location" class="form-label"></label>
+        <input asp-for="Location" class="form-control" />
+        <span asp-validation-for="Location" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="NarrativeNote" class="form-label"></label>
+        <textarea asp-for="NarrativeNote" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="NarrativeNote" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+    </div>
+    <button class="btn btn-primary align-self-start" type="submit">Upload and hash</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,86 @@
+﻿@{
+    var isSignedIn = User.Identity?.IsAuthenticated == true;
+    var canCreateCases = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner);
+    var activeRoles = new[] { AppRoles.Administrator, AppRoles.Examiner, AppRoles.Reviewer, AppRoles.ReadOnly }
+        .Where(User.IsInRole)
+        .ToArray();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Digital Evidence Lab</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/DigitalEvidenceManagementSystem.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm app-nav mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-semibold brand-lockup" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="brand-mark">DE</span>
+                    <span>Digital Evidence Lab</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    @if (isSignedIn)
+                    {
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Cases" asp-action="Index">Cases</a>
+                            </li>
+                            @if (canCreateCases)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Cases" asp-action="Create">New Case</a>
+                                </li>
+                            }
+                        </ul>
+                        <div class="nav-user">
+                            <span>@(User.Identity?.Name ?? "Signed in")</span>
+                            @if (activeRoles.Length > 0)
+                            {
+                                <small>@string.Join(", ", activeRoles)</small>
+                            }
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <button class="btn btn-sm btn-outline-light" type="submit">Sign out</button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav flex-grow-1"></ul>
+                        <div class="nav-auth-actions">
+                            <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Sign in</a>
+                            <a class="btn btn-sm btn-light" asp-controller="Account" asp-action="Register">Sign up</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container app-shell">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer text-muted">
+        <div class="container">
+            &copy; 2026 - Digital Evidence Lab
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

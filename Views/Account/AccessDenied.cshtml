@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Role required</p>
+        <h1>Access denied</h1>
+    </div>
+    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Dashboard</a>
+</section>
+
+<section class="content-panel">
+    <h2>Limited access</h2>
+    <p>Your current role does not allow this action.</p>
+</section>

@@ -1,0 +1,81 @@
+@model CaseDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Case.CaseNumber;
+    var canUploadEvidence = User.IsInRole(AppRoles.Administrator) || User.IsInRole(AppRoles.Examiner);
+}
+
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Case @Model.Case.CaseNumber</p>
+        <h1>@Model.Case.Title</h1>
+    </div>
+    @if (canUploadEvidence)
+    {
+        <a class="btn btn-primary" asp-controller="Evidence" asp-action="Upload" asp-route-caseId="@Model.Case.CaseId">Upload evidence</a>
+    }
+</section>
+
+<section class="summary-grid">
+    <div>
+        <span>Status</span>
+        <strong>@Model.Case.Status</strong>
+    </div>
+    <div>
+        <span>Priority</span>
+        <strong>@Model.Case.Priority</strong>
+    </div>
+    <div>
+        <span>Assigned examiner</span>
+        <strong>@(Model.Case.AssignedExaminerName ?? "Unassigned")</strong>
+    </div>
+    <div>
+        <span>Created UTC</span>
+        <strong>@Model.Case.CreatedAtUtc.ToString("u")</strong>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.Case.Description))
+{
+    <section class="content-panel">
+        <h2>Case Notes</h2>
+        <p>@Model.Case.Description</p>
+    </section>
+}
+
+<section class="content-panel">
+    <div class="section-header">
+        <h2>Evidence</h2>
+        @if (canUploadEvidence)
+        {
+            <a asp-controller="Evidence" asp-action="Upload" asp-route-caseId="@Model.Case.CaseId">Add item</a>
+        }
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th>File</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>SHA-256</th>
+                <th>Status</th>
+                <th>Uploaded</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.EvidenceItems)
+            {
+                <tr>
+                    <td><a asp-controller="Evidence" asp-action="Details" asp-route-id="@item.EvidenceId">@item.OriginalFileName</a></td>
+                    <td>@item.EvidenceType</td>
+                    <td>@item.FileSizeBytes.ToString("N0") bytes</td>
+                    <td><code class="hash">@item.Sha256Hash</code></td>
+                    <td><span class="badge verify-@item.VerificationStatus.ToLowerInvariant()">@item.VerificationStatus</span></td>
+                    <td>@item.UploadedAtUtc.ToString("u")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</section>
