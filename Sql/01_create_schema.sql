@@ -57,13 +57,16 @@ CREATE TABLE dbo.Cases
     Status              NVARCHAR(30) NOT NULL CONSTRAINT DF_Cases_Status DEFAULT ('Open'),
     Priority            NVARCHAR(30) NOT NULL CONSTRAINT DF_Cases_Priority DEFAULT ('Normal'),
     AssignedExaminerId  INT NULL,
+    ClosedByUserId      INT NULL,
+    ResolutionReason    NVARCHAR(2000) NULL,
     CreatedAtUtc        DATETIME2(3) NOT NULL CONSTRAINT DF_Cases_CreatedAtUtc DEFAULT (SYSUTCDATETIME()),
     UpdatedAtUtc        DATETIME2(3) NOT NULL CONSTRAINT DF_Cases_UpdatedAtUtc DEFAULT (SYSUTCDATETIME()),
     ClosedAtUtc         DATETIME2(3) NULL,
     CONSTRAINT UQ_Cases_CaseNumber UNIQUE (CaseNumber),
-    CONSTRAINT CK_Cases_Status CHECK (Status IN ('Open', 'In Review', 'On Hold', 'Closed')),
+    CONSTRAINT CK_Cases_Status CHECK (Status IN ('Open', 'In Review', 'On Hold', 'Completed', 'Cancelled', 'Closed')),
     CONSTRAINT CK_Cases_Priority CHECK (Priority IN ('Low', 'Normal', 'High', 'Critical')),
-    CONSTRAINT FK_Cases_AssignedExaminer FOREIGN KEY (AssignedExaminerId) REFERENCES dbo.Users(UserId)
+    CONSTRAINT FK_Cases_AssignedExaminer FOREIGN KEY (AssignedExaminerId) REFERENCES dbo.Users(UserId),
+    CONSTRAINT FK_Cases_ClosedBy FOREIGN KEY (ClosedByUserId) REFERENCES dbo.Users(UserId)
 );
 GO
 
@@ -130,7 +133,7 @@ CREATE TABLE dbo.AccessAuditLogs
     Details         NVARCHAR(2000) NULL,
     Succeeded       BIT NOT NULL CONSTRAINT DF_AccessAuditLogs_Succeeded DEFAULT (1),
     CONSTRAINT FK_Audit_Users FOREIGN KEY (UserId) REFERENCES dbo.Users(UserId),
-    CONSTRAINT CK_Audit_EventType CHECK (EventType IN ('login', 'logout', 'case_view', 'case_create', 'upload', 'download', 'hash_verify', 'metadata_change', 'access_denied'))
+    CONSTRAINT CK_Audit_EventType CHECK (EventType IN ('login', 'logout', 'case_view', 'case_create', 'case_update', 'case_complete', 'case_cancel', 'case_delete', 'upload', 'download', 'hash_verify', 'metadata_change', 'access_denied'))
 );
 GO
 
